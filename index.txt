@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國中戰力潛能分析：你的大腦是什麼屬性？</title>
+    <style>
+        :root { --primary: #4A90E2; --bg: #f4f7f6; --card: #ffffff; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding: 20px; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; background: var(--card); padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: var(--primary); text-align: center; font-size: 1.5rem; margin-bottom: 10px; }
+        .intro { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 30px; }
+        .input-group { margin-bottom: 30px; background: #eef5ff; padding: 20px; border-radius: 10px; border: 2px solid #d6e4ff; }
+        .input-group label { display: block; font-weight: bold; margin-bottom: 10px; color: #2c3e50; }
+        .input-group input { width: 95%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
+        
+        .question-block { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        .q-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; color: #2c3e50; }
+        .options label { display: block; background: #fafafa; padding: 12px 15px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; transition: 0.2s; }
+        .options label:hover { background: #eef5ff; border-color: var(--primary); }
+        input[type="radio"] { margin-right: 10px; }
+        .btn-submit { display: block; width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1.2rem; cursor: pointer; margin-top: 20px; }
+        .btn-submit:hover { background: #357abd; }
+        .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* 結果頁樣式 */
+        #result-area { display: none; text-align: center; }
+        .type-badge { display: inline-block; padding: 5px 15px; background: #333; color: #fff; border-radius: 20px; font-size: 0.9rem; margin-bottom: 10px; }
+        .type-title { font-size: 2rem; font-weight: bold; margin: 10px 0; }
+        .type-desc { text-align: left; background: #f9f9f9; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        .highlight { color: var(--primary); font-weight: bold; }
+        .advice-box { text-align: left; border-left: 5px solid var(--primary); background: #eef5ff; padding: 15px; margin-top: 20px; }
+        .loading { color: #888; font-style: italic; display: none; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="quiz-area">
+    <h1>🚀 國中戰力潛能分析</h1>
+    <p class="intro">這不是考試，沒有標準答案。<br>請依照你「最近最真實的感覺」選出最像你的選項！</p>
+    
+    <form id="quizForm">
+        <div class="input-group">
+            <label for="studentName">👋 嗨！請問你的名字是？</label>
+            <input type="text" id="studentName" name="studentName" placeholder="請輸入姓名..." required>
+        </div>
+
+        <div class="question-block">
+            <div class="q-title">Q1. 想到即將開始的國中生活，你現在的心情比較接近哪一種？</div>
+            <div class="options">
+                <label><input type="radio" name="q1" value="A"> (A) 興奮期待：終於長大了！我想在國中重新證明自己。</label>
+                <label><input type="radio" name="q1" value="B"> (B) 平靜穩定：沒想太多，反正就是換個學校讀書。</label>
+                <label><input type="radio" name="q1" value="C"> (C) 緊張焦慮：聽說國中變難變嚴，我不確定能否適應。</label>
+                <label><input type="radio" name="q1" value="D"> (D) 儲備能量：最近覺得有點累，想先好好休息再說。</label>
+            </div>
+        </div>
+        
+        <div class="question-block">
+            <div class="q-title">Q2. 回想一下國小的表現，再想想國中，你對自己的期許是？</div>
+            <div class="options">
+                <label><input type="radio" name="q2" value="A"> (A) 渴望變強：我國小可能有點保留實力，國中我想拚一次！</label>
+                <label><input type="radio" name="q2" value="B"> (B) 維持現狀：我國小成績就不錯，國中保持水準就好。</label>
+                <label><input type="radio" name="q2" value="C"> (C) 擔心退步：我國小成績還可以，但有點擔心國中會掉下來。</label>
+                <label><input type="radio" name="q2" value="D"> (D) 順其自然：不給自己太大壓力，能順利過關就好。</label>
+            </div>
+        </div>
+
+        <hr>
+        <p style="text-align:center; color:#888;">🧠 進入大腦反應測試區</p>
+
+        <div class="question-block">
+            <div class="q-title">Q3. 【面對難題】數學老師發下一張「超級難」的加分挑戰題，全班沒幾個人會寫，這時你會想：</div>
+            <div class="options">
+                <label><input type="radio" name="q3" value="A"> (A) 有點意思：雖然很難，但我來試試看能不能解出來。</label>
+                <label><input type="radio" name="q3" value="B"> (B) 謹慎觀察：怕寫錯尷尬，先看看別人怎麼寫。</label>
+                <label><input type="radio" name="q3" value="C"> (C) 理性評估：題目好像超出範圍了，不一定要現在寫。</label>
+                <label><input type="radio" name="q3" value="D"> (D) 節省力氣：與其卡在這裡，不如先休息一下。</label>
+            </div>
+        </div>
+
+        <div class="question-block">
+            <div class="q-title">Q4. 【面對失敗】第一次段考成績比預期的低很多（考砸了），你心裡會想：</div>
+            <div class="options">
+                <label><input type="radio" name="q4" value="A"> (A) 檢討策略：一定是我讀書方法哪裡要調整，我要找出來。</label>
+                <label><input type="radio" name="q4" value="B"> (B) 分析原因：運氣不太好，考到不熟的，且改得嚴。</label>
+                <label><input type="radio" name="q4" value="C"> (C) 感到挫折：這種感覺不好受，懷疑自己不擅長這科。</label>
+                <label><input type="radio" name="q4" value="D"> (D) 轉換心情：沒關係，一次考試不代表全部，有及格就好。</label>
+            </div>
+        </div>
+
+        <div class="question-block">
+            <div class="q-title">Q5. 【面對成功】如果你這次居然考了全班第一名，大家都在拍手，你心裡真正的感覺是？</div>
+            <div class="options">
+                <label><input type="radio" name="q5" value="A"> (A) 覺得踏實：這證明我這陣子的努力是對的。</label>
+                <label><input type="radio" name="q5" value="B"> (B) 覺得幸運：剛好猜中而已，不覺得下次還會這麼順利。</label>
+                <label><input type="radio" name="q5" value="C"> (C) 覺得壓力：慘了...大家期望變高，下次沒第一名會丟臉。</label>
+                <label><input type="radio" name="q5" value="D"> (D) 關注實質：考得不錯，但我比較在意有沒有實質獎勵？</label>
+            </div>
+        </div>
+
+        <div class="question-block">
+            <div class="q-title">Q6. 【面對枯燥】老師派了一個「抄寫課文 3 遍」的作業，真的很無聊，但一定要交。你會怎麼做？</div>
+            <div class="options">
+                <label><input type="radio" name="q6" value="A"> (A) 堅持完成：這是責任，趕快寫完再去玩。</label>
+                <label><input type="radio" name="q6" value="B"> (B) 講求效率：字不用太漂亮，有交就好。</label>
+                <label><input type="radio" name="q6" value="C"> (C) 等待時機：拖到最後一刻有感覺再寫，或賭賭看。</label>
+                <label><input type="radio" name="q6" value="D"> (D) 自我挑戰：試試看計時挑戰，看能不能飆速寫完！</label>
+            </div>
+        </div>
+
+        <div class="question-block">
+            <div class="q-title">Q7. 【選擇課程】如果在學校可以讓你「自由選修」一堂課，你會選哪一種？</div>
+            <div class="options">
+                <label><input type="radio" name="q7" value="A"> (A) 挑戰型：選很難但學會後會變強的課。</label>
+                <label><input type="radio" name="q7" value="B"> (B) 舞台型：選我有把握拿高分、可以展現優點的課。</label>
+                <label><input type="radio" name="q7" value="C"> (C) 興趣型：選好玩、有趣的，跟考不考試無關。</label>
+                <label><input type="radio" name="q7" value="D"> (D) 安全型：選老師人好、氣氛輕鬆、容易過關的課。</label>
+            </div>
+        </div>
+
+        <div class="question-block">
+            <div class="q-title">Q8. 【遇到卡關】當你覺得某一科怎麼讀都讀不懂時，你通常會？</div>
+            <div class="options">
+                <label><input type="radio" name="q8" value="A"> (A) 主動求救：去問老師或同學，不弄懂會覺得怪怪的。</label>
+                <label><input type="radio" name="q8" value="B"> (B) 自我保護：不敢問，怕顯得笨，試著自己硬背。</label>
+                <label><input type="radio" name="q8" value="C"> (C) 檢視教材：覺得課本編排不好，或老師講不清楚。</label>
+                <label><input type="radio" name="q8" value="D"> (D) 策略放手：先放著，把時間拿去讀有把握的科目。</label>
+            </div>
+        </div>
+        
+        <div class="question-block">
+            <div class="q-title">Q9. 【面對批評】如果老師當著大家的面，說你的作業寫得很不用心，你會？</div>
+            <div class="options">
+                <label><input type="radio" name="q9" value="A"> (A) 反思改進：雖然丟臉，但我會檢查是不是真的有疏忽。</label>
+                <label><input type="radio" name="q9" value="B"> (B) 感到委屈：覺得老師誤會我，別人也這樣寫為何只說我？</label>
+                <label><input type="radio" name="q9" value="C"> (C) 感到羞愧：覺得自己很糟糕，連這點小事都做不好。</label>
+                <label><input type="radio" name="q9" value="D"> (D) 情緒隔絕：聽聽就好，盡量不讓這件事影響心情。</label>
+            </div>
+        </div>
+
+        <div class="question-block">
+            <div class="q-title">Q10. 【動力來源】在什麼情況下，你會願意拿出 120% 的力氣去讀書？</div>
+            <div class="options">
+                <label><input type="radio" name="q10" value="A"> (A) 自我實現：當我想挑戰自己極限在哪裡的時候。</label>
+                <label><input type="radio" name="q10" value="B"> (B) 外在獎勵：當考好有具體獎勵，或有人關注我時。</label>
+                <label><input type="radio" name="q10" value="C"> (C) 興趣連結：當內容是我超感興趣的主題時。</label>
+                <label><input type="radio" name="q10" value="D"> (D) 避免後果：當不讀書會有我不喜歡的後果時。</label>
+            </div>
+        </div>
+
+        <button type="button" class="btn-submit" id="submitBtn" onclick="processQuiz()">查看我的大腦屬性</button>
+        <div class="loading" id="loadingText">正在分析數據並上傳資料庫，請稍候...</div>
+    </form>
+</div>
+
+<div class="container" id="result-area">
+    <div id="result-badge" class="type-badge">檢測結果</div>
+    <div id="result-title" class="type-title" style="color:var(--primary)"></div>
+    <div style="font-size:1.2rem; margin-bottom:10px;">嗨，<span id="display-name" style="font-weight:bold;"></span>！</div>
+    
+    <div class="type-desc">
+        <p><strong>✨ 你的特質：</strong><br><span id="result-traits"></span></p>
+        <p><strong>🔥 給你的超能力建議：</strong><br><span id="result-advice"></span></p>
+    </div>
+
+    <div class="advice-box">
+        <strong>💡 給爸爸媽媽的小提醒：</strong>
+        <p id="parent-advice" style="margin-top:5px; font-size:0.95rem;"></p>
+    </div>
+
+    <button class="btn-submit" onclick="location.reload()">再測一次</button>
+</div>
+
+<script>
+    // ⚠️⚠️⚠️ 請將下方的網址換成你自己的 Apps Script 網址 ⚠️⚠️⚠️
+    const googleScriptUrl = "https://script.google.com/macros/s/AKfycbyo84K6T8UmGL0zuN_JRYTW8HOLBntuwlrc8-sCrLjVaQdrux6jTwwfhgzg552WuOCi/exec";
+    // ⚠️⚠️⚠️ 範例： "https://script.google.com/macros/s/AKfycbx.../exec"
+
+    function processQuiz() {
+        const form = document.getElementById('quizForm');
+        const formData = new FormData(form);
+        const name = document.getElementById('studentName').value.trim();
+
+        // 檢查姓名
+        if (!name) {
+            alert("請先輸入你的名字喔！");
+            return;
+        }
+        
+        // 檢查是否每題都填寫
+        let answeredCount = 0;
+        for (let pair of formData.entries()) {
+            if (pair[0].startsWith('q')) answeredCount++;
+        }
+        if (answeredCount < 10) {
+            alert("請先完成所有題目再送出喔！");
+            return;
+        }
+
+        // 鎖定按鈕避免重複按
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('loadingText').style.display = 'block';
+
+        // 1. 統計分數 (Q3-Q10)
+        let counts = { A: 0, B: 0, C: 0, D: 0 };
+        for (let i = 3; i <= 10; i++) {
+            let val = formData.get('q' + i);
+            if (val) counts[val]++;
+        }
+
+        // 2. 邏輯判定
+        let q5 = formData.get('q5');
+        let q6 = formData.get('q6');
+        let q7 = formData.get('q7');
+        let q10 = formData.get('q10');
+        let type = "";
+        
+        let maxScore = Math.max(counts.A, counts.B, counts.C, counts.D);
+        let maxOption = Object.keys(counts).find(key => counts[key] === maxScore);
+
+        if (maxOption === 'A') {
+            type = "A";
+        } else if (maxOption === 'C') {
+            type = "C";
+        } else {
+            if (q7 === 'C' || q10 === 'C' || (counts.D > 2 && q6 === 'D')) {
+                type = "E";
+            } else if (q7 === 'B' || q10 === 'B' || q5 === 'D') {
+                type = "D";
+            } else if (maxOption === 'D' && (q7 === 'D' || q10 === 'D')) {
+                type = "F";
+            } else {
+                type = "B";
+            }
+        }
+        if (type === "B" && counts.D > counts.B) type = "F"; 
+
+        // 3. 準備上傳的資料
+        const answers = {};
+        for (let i = 1; i <= 10; i++) answers['q'+i] = formData.get('q'+i);
+
+        const uploadData = {
+            name: name,
+            resultType: type,
+            answers: answers
+        };
+
+        // 4. 上傳到 Google Sheets (不等待回應直接顯示結果，提升體驗)
+        fetch(googleScriptUrl, {
+            method: 'POST',
+            mode: 'no-cors', // 重要：避免跨域錯誤
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(uploadData)
+        }).then(() => {
+            console.log("Data sent");
+        }).catch(err => {
+            console.error("Error:", err);
+            // 就算上傳失敗也讓學生看結果，避免卡住
+        });
+
+        // 5. 顯示結果
+        setTimeout(() => {
+            showResult(type, name);
+        }, 1500); // 假裝跑一下 Loading 增加儀式感
+    }
+
+    function showResult(type, name) {
+        const results = {
+            "A": {
+                title: "🟢 A型：成長型挑戰者",
+                traits: "你是班上的火車頭！你有責任感，相信努力就能變強。遇到困難時，你會想辦法解決，而不是逃避。你擁有很棒的「抗壓性」與「學習自信」。",
+                advice: "別忘了偶爾停下來休息！試著把你的學習策略分享給同學，擔任小老師會讓你學得更深。",
+                parent: "您的孩子擁有強大的自我驅動力。請多肯定他的「策略」與「堅持」，並適時提醒他休息與放鬆。"
+            },
+            "B": {
+                title: "🟡 B型：熱情型行動者",
+                traits: "你有滿滿的熱情與行動力！你反應很快，也不怕新挑戰。不過有時候遇到挫折，你習慣覺得是運氣不好或題目太難，比較少檢查自己。",
+                advice: "你的能量很強，如果能把「怪運氣」的時間拿來「找方法」，你會進步得超級快！試著每天寫下一件自己做得很棒的小事。",
+                parent: "孩子很有活力，但容易歸咎外在。請溫柔地引導他思考「自己能控制的部分」，將焦點從藉口轉移到具體行動上。"
+            },
+            "C": {
+                title: "🔵 C型：專注型完美者",
+                traits: "你對自己要求很高，做事細心又負責。但你很怕犯錯，考不好時會非常自責，覺得自己不夠好。其實，你已經很棒了！",
+                advice: "錯誤不是因為你笨，只是代表「還沒熟練」而已。試著對自己寬容一點，不完美也沒關係，放輕鬆反而表現會更好喔！",
+                parent: "孩子責任感強但易焦慮。請成為他的避風港，告訴他「無論成績如何，我們都愛你」，幫助他將自我價值與分數脫鉤。"
+            },
+            "D": {
+                title: "🟠 D型：表現型堅持者",
+                traits: "你很重視榮譽感，喜歡被看見、被肯定的感覺！為了掌聲，你願意付出努力。但如果沒人稱讚，你可能就會覺得沒動力。",
+                advice: "掌聲很棒，但「自己肯定自己」更重要！試著在沒人看見的時候也默默努力，那種帥氣才是最真實的實力。",
+                parent: "孩子需要舞台與掌聲。請多給予具體的肯定，但也要引導他看見「努力本身的價值」，學會為自己而讀。"
+            },
+            "E": {
+                title: "🩵 E型：潛能型探索者",
+                traits: "你其實很聰明，反應也快！只是你覺得課本很無聊，只對自己有興趣的東西（如遊戲、社團）有動力。你是個沉睡的巨人。",
+                advice: "試著把你的聰明用一點點在課業上，當作是「破關遊戲」來玩。你會發現，只要你願意，學校的東西根本難不倒你！",
+                parent: "孩子很聰明但缺乏動機。請試著將學習與他的興趣做連結，或是用「談判/交換」的方式，激發他的挑戰慾。"
+            },
+            "F": {
+                title: "🩶 F型：支持型學習者",
+                traits: "你比較安靜，也比較容易緊張。你常覺得自己學不會，所以乾脆不寫作業來保護自己。其實你不是不會，只是需要多一點時間。",
+                advice: "不用跟別人比，只要跟昨天的自己比就好。每天只設定一個「超簡單」的小目標（例如只寫 3 題），慢慢來，你做得到的！",
+                parent: "孩子目前信心不足。請降低標準，給予大量的安全感與陪伴。只要他願意開始做一點點，就給予大大的肯定。"
+            }
+        };
+
+        const data = results[type];
+        document.getElementById('quiz-area').style.display = 'none';
+        document.getElementById('result-area').style.display = 'block';
+        
+        document.getElementById('display-name').innerText = name;
+        document.getElementById('result-title').innerText = data.title;
+        document.getElementById('result-traits').innerText = data.traits;
+        document.getElementById('result-advice').innerText = data.advice;
+        document.getElementById('parent-advice').innerText = data.parent;
+        
+        const colors = { "A": "#2ecc71", "B": "#f1c40f", "C": "#3498db", "D": "#e67e22", "E": "#1abc9c", "F": "#95a5a6" };
+        document.getElementById('result-title').style.color = colors[type];
+    }
+</script>
+
+</body>
+</html>
