@@ -1,323 +1,694 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國中戰力潛能分析：你的大腦是什麼屬性？</title>
-    <style>
-        :root { --primary: #4A90E2; --bg: #f4f7f6; --card: #ffffff; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding: 20px; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; background: var(--card); padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { color: var(--primary); text-align: center; font-size: 1.5rem; margin-bottom: 10px; }
-        .intro { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 30px; }
-        .input-group { margin-bottom: 30px; background: #eef5ff; padding: 20px; border-radius: 10px; border: 2px solid #d6e4ff; }
-        .input-group label { display: block; font-weight: bold; margin-bottom: 10px; color: #2c3e50; }
-        .input-group input { width: 95%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
+import React, { useState } from 'react';
+import { 
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
+  ResponsiveContainer, 
+} from 'recharts';
+import { 
+  ShieldCheck, BrainCircuit, Compass, Target, 
+  FileText, Activity, Zap, MessageCircle, 
+  AlertTriangle, User, Calendar, Award, GraduationCap, Flame, Coffee,
+  CheckCircle2, XCircle, ChevronRight, Menu, TrendingUp, Quote, Lightbulb,
+  Beaker, Calculator, Languages, Info, Star, Users, Briefcase, Cpu, Heart, Truck,
+  Printer
+} from 'lucide-react';
+
+// ⚠️ 請更換為您的 Google Apps Script 網址 ⚠️
+const googleScriptUrl = "https://script.google.com/macros/s/AKfycbwqpAVOpZKKQTox1q_ev0lZE5tMAAnZQCFfF6kMDuQkHZ8JKL_CW1Y0cO33ed-sMtpC/exec";
+
+// --- 專業報告組件 (Page 1 - 6 通用模板) ---
+const ReportTemplate = ({ data, onBack }) => {
+  if (!data) return null;
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="min-h-screen bg-[#f8fafc] text-[#1e293b] py-16 px-6 md:px-12 font-sans antialiased print:bg-white print:py-0 print:px-0">
+      <div className="max-w-6xl mx-auto space-y-12 print:space-y-8">
         
-        .question-block { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-        .q-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; color: #2c3e50; }
-        .options label { display: block; background: #fafafa; padding: 12px 15px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; transition: 0.2s; }
-        .options label:hover { background: #eef5ff; border-color: var(--primary); }
-        input[type="radio"] { margin-right: 10px; }
-        .btn-submit { display: block; width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1.2rem; cursor: pointer; margin-top: 20px; }
-        .btn-submit:hover { background: #357abd; }
-        .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
-
-        /* 結果頁樣式 */
-        #result-area { display: none; text-align: center; }
-        .type-badge { display: inline-block; padding: 5px 15px; background: #333; color: #fff; border-radius: 20px; font-size: 0.9rem; margin-bottom: 10px; }
-        .type-title { font-size: 2rem; font-weight: bold; margin: 10px 0; }
-        .type-desc { text-align: left; background: #f9f9f9; padding: 20px; border-radius: 10px; margin-top: 20px; }
-        .highlight { color: var(--primary); font-weight: bold; }
-        .advice-box { text-align: left; border-left: 5px solid var(--primary); background: #eef5ff; padding: 15px; margin-top: 20px; }
-        .loading { color: #888; font-style: italic; display: none; margin-top: 10px; }
-    </style>
-</head>
-<body>
-
-<div class="container" id="quiz-area">
-    <h1>🚀 國中戰力潛能分析</h1>
-    <p class="intro">這不是考試，沒有標準答案。<br>請依照你「最近最真實的感覺」選出最像你的選項！</p>
-    
-    <form id="quizForm">
-        <div class="input-group">
-            <label for="studentName">👋 嗨！請問你的名字是？</label>
-            <input type="text" id="studentName" name="studentName" placeholder="請輸入姓名..." required>
+        {/* 操作按鈕列 */}
+        <div className="flex justify-end gap-4 mb-4 print:hidden">
+          <button 
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-full font-bold shadow-lg hover:bg-slate-800 transition-all"
+          >
+            <Printer size={18} /> 列印 / 輸出 PDF 留檔
+          </button>
         </div>
 
-        <div class="question-block">
-            <div class="q-title">Q1. 想到即將開始的國中生活，你現在的心情比較接近哪一種？</div>
-            <div class="options">
-                <label><input type="radio" name="q1" value="A"> (A) 終於長大了！我想在國中重新證明自己。</label>
-                <label><input type="radio" name="q1" value="B"> (B) 沒想太多，反正就是換個學校讀書。</label>
-                <label><input type="radio" name="q1" value="C"> (C) 聽說國中變難變嚴，我不確定能否適應。</label>
-                <label><input type="radio" name="q1" value="D"> (D) 最近覺得有點累，想先好好休息再說。</label>
+        {/* 檔案化頁首 */}
+        <div className="flex flex-col md:flex-row justify-between items-end gap-8 border-b-4 border-slate-900 pb-10 print:pb-6">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-900 text-white rounded text-xs font-bold tracking-[0.2em] uppercase">
+              Official Evaluation Report
             </div>
-        </div>
-        
-        <div class="question-block">
-            <div class="q-title">Q2. 回想一下國小的表現，再想想國中，你對自己的期許是？</div>
-            <div class="options">
-                <label><input type="radio" name="q2" value="A"> (A) 我國小可能有點保留實力，國中我想拚一次！</label>
-                <label><input type="radio" name="q2" value="B"> (B) 我國小成績就不錯，國中保持水準就好。</label>
-                <label><input type="radio" name="q2" value="C"> (C) 我國小成績還可以，但有點擔心國中會掉下來。</label>
-                <label><input type="radio" name="q2" value="D"> (D) 不給自己太大壓力，能順利過關就好。</label>
+            <h1 className="text-5xl font-light tracking-tight text-slate-900 print:text-4xl">
+              🎓 耶加國中部：<span className="font-bold">國中生學習動機與韌性評估報告</span>
+            </h1>
+            <div className="flex flex-wrap gap-8 text-base text-slate-500 pt-2">
+              <div className="flex items-center gap-2"><User size={20} /> 姓名：<span className="text-slate-900 font-bold">{data.name}</span></div>
+              <div className="flex items-center gap-2"><Calendar size={20} /> 檢測日期：<span className="text-slate-900 font-bold">{data.date}</span></div>
+              <div className="flex items-center gap-2"><FileText size={20} /> 報告編號：<span className="text-slate-900 font-bold">{data.reportId}</span></div>
             </div>
-        </div>
-
-        <hr>
-        <p style="text-align:center; color:#888;">🧠 進入大腦反應測試區</p>
-
-        <div class="question-block">
-            <div class="q-title">Q3. 數學老師發下一張「超級難」的加分挑戰題，全班沒幾個人會寫，這時你會想：</div>
-            <div class="options">
-                <label><input type="radio" name="q3" value="A"> (A) 雖然很難，但我來試試看能不能解出來。</label>
-                <label><input type="radio" name="q3" value="B"> (B) 怕寫錯尷尬，先看看別人怎麼寫。</label>
-                <label><input type="radio" name="q3" value="C"> (C) 題目好像超出範圍了，不一定要現在寫。</label>
-                <label><input type="radio" name="q3" value="D"> (D) 與其卡在這裡，不如先休息一下。</label>
+          </div>
+          <div className="text-right">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">歸屬類型鑑定</div>
+            <div className={`text-3xl font-black px-6 py-3 rounded-xl border-2 ${data.colorClass.bg} ${data.colorClass.text} ${data.colorClass.border} shadow-sm`}>
+              {data.typeTitle}
             </div>
+          </div>
         </div>
 
-        <div class="question-block">
-            <div class="q-title">Q4. 第一次段考成績比預期的低很多（考砸了），你心裡會想：</div>
-            <div class="options">
-                <label><input type="radio" name="q4" value="A"> (A) 一定是我讀書方法哪裡要調整，我要找出來。</label>
-                <label><input type="radio" name="q4" value="B"> (B) 運氣不太好，考到不熟的，且改得嚴。</label>
-                <label><input type="radio" name="q4" value="C"> (C) 這種感覺不好受，懷疑自己不擅長這科。</label>
-                <label><input type="radio" name="q4" value="D"> (D) 沒關係，一次考試不代表全部，有及格就好。</label>
+        {/* 數據雷達與核心評估 */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start print:grid-cols-3">
+          <div className="lg:col-span-2 bg-white rounded-3xl p-10 shadow-sm border border-slate-100 relative overflow-hidden print:shadow-none print:border-slate-200">
+            <div className="relative z-10">
+              <h2 className="text-2xl font-bold flex items-center gap-3 mb-10 text-slate-800">
+                <Target className="text-slate-900" size={28} /> 核心心理特徵空間向量 (Radar Chart)
+              </h2>
+              <div className="h-[400px] print:h-[350px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart data={data.radarData}>
+                    <PolarGrid strokeDasharray="3 3" />
+                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#475569', fontSize: 14, fontWeight: 700 }} />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} stroke="#e2e8f0" />
+                    <Radar name="核心特徵" dataKey="value" stroke="#0f172a" strokeWidth={3} fill="#0f172a" fillOpacity={0.15} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="grid grid-cols-3 gap-4 mt-6 print:mt-2">
+                {data.radarData.map((item, idx) => (
+                   <div key={idx} className="text-center p-3 bg-slate-50 rounded-xl print:bg-white print:border print:border-slate-100">
+                      <p className="text-[10px] text-slate-400 font-bold uppercase">{item.subject}</p>
+                      <p className="text-lg font-bold text-slate-800">{item.value}%</p>
+                   </div>
+                ))}
+              </div>
             </div>
-        </div>
-
-        <div class="question-block">
-            <div class="q-title">Q5. 如果你這次考試分數大幅進步，大家都在拍手，你心裡真正的感覺是？</div>
-            <div class="options">
-                <label><input type="radio" name="q5" value="A"> (A) 這證明我這陣子的努力是對的。</label>
-                <label><input type="radio" name="q5" value="B"> (B) 剛好猜中而已，不覺得下次還會這麼順利。</label>
-                <label><input type="radio" name="q5" value="C"> (C) 慘了...大家現在期望太高了，下次如果退步的話會很丟臉...</label>
-                <label><input type="radio" name="q5" value="D"> (D) 考得不錯，但我比較在意有沒有實質獎勵？</label>
+          </div>
+          
+          <div className="space-y-6">
+            <div className="bg-[#0f172a] text-white rounded-3xl p-10 shadow-xl h-full flex flex-col justify-between border border-white/10 print:bg-slate-900 print:shadow-none">
+              <div>
+                <h3 className="text-xl font-bold flex items-center gap-2 mb-8 text-white"><AlertTriangle className="text-amber-400" size={24} /> 耶加核心評估建議</h3>
+                <div className="bg-white/10 p-6 rounded-2xl border-l-4 border-emerald-400 mb-8 shadow-inner">
+                   <p className="text-2xl font-bold leading-relaxed text-emerald-50 italic">「{data.coreDiagnostic}」</p>
+                </div>
+                <div className="space-y-4">
+                  <div className="bg-white/5 p-5 rounded-2xl border border-white/10">
+                    <p className="text-xs text-amber-400 font-bold uppercase mb-2 tracking-[0.2em]">⚠ 耶加專家警示</p>
+                    <p className="text-sm text-slate-300 leading-relaxed font-medium">{data.alert}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-10 pt-8 border-t border-white/10 flex items-center gap-4">
+                <div className="h-14 w-14 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-900/20"><ShieldCheck size={32} /></div>
+                <div>
+                  <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Resilience Base</p>
+                  <p className="text-lg font-bold tracking-widest text-emerald-400 uppercase">{data.resilienceGrade}</p>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
 
-        <div class="question-block">
-            <div class="q-title">Q6. 老師派了一個「抄寫課文 3 遍」的作業，真的很無聊，但一定要交。你會怎麼做？</div>
-            <div class="options">
-                <label><input type="radio" name="q6" value="A"> (A) 這是責任，趕快寫完再去玩。</label>
-                <label><input type="radio" name="q6" value="B"> (B) 字不用太漂亮，有交就好。</label>
-                <label><input type="radio" name="q6" value="C"> (C) 拖到最後一刻有感覺再寫，或賭賭看。</label>
-                <label><input type="radio" name="q6" value="D"> (D) 試試看計時挑戰，看能不能飆速寫完！</label>
+        {/* 專業解析 */}
+        <section className="pt-8 print:pt-4">
+          <div className="flex items-center gap-4 mb-10"><div className="w-12 h-1 bg-slate-900"></div><h2 className="text-3xl font-bold text-slate-900">🔍 耶加專業解析：孩子的內在運作機制</h2></div>
+          <p className="text-lg text-slate-600 mb-8 leading-relaxed px-2">您的孩子在耶加的 <span className="text-slate-900 font-bold underline decoration-indigo-300 underline-offset-4">T-CRM 三元認知韌性模式</span> 中，{data.typeIntro}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print:grid-cols-2">
+            {data.mechanics.map((m, i) => (
+              <div key={i} className="bg-white p-10 rounded-3xl border border-slate-100 shadow-sm print:p-6 print:rounded-2xl">
+                <h4 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-3"><BrainCircuit className="text-indigo-600" size={28} /> {m.title}</h4>
+                <p className="text-base text-slate-500 leading-loose whitespace-pre-line">{m.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 雙師介入協議 */}
+        <section className="pt-12 print:pt-6">
+          <div className="flex items-center gap-4 mb-10"><div className="w-12 h-1 bg-slate-900"></div><h2 className="text-3xl font-bold text-slate-900">🛡 耶加國中部的「雙師制」介入方案</h2></div>
+          <div className="relative py-10 px-12 bg-white border border-slate-100 shadow-sm mb-12 overflow-hidden rounded-3xl text-center print:py-6">
+            <Quote className="absolute left-4 top-4 text-slate-100" size={80} />
+            <p className="text-2xl font-bold text-slate-800 relative z-10 leading-relaxed print:text-xl" dangerouslySetInnerHTML={{__html: data.dualTeacherIntro + '<br/><span class="text-lg font-medium text-slate-500 mt-2 block">—— ' + data.dualTeacherSlogan + '</span>'}}></p>
+          </div>
+          <div className="space-y-10 print:space-y-6">
+            <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden print:rounded-3xl">
+              <div className="bg-slate-900 p-10 text-white flex justify-between items-center print:p-6">
+                <h3 className="text-2xl font-bold flex items-center gap-3"><GraduationCap size={32} className="text-indigo-400" /> 1. 科任專業教師：{data.strategy1Title}</h3>
+                <p className="text-slate-400 font-bold text-sm tracking-[0.2em] uppercase">{data.strategy1Tag}</p>
+              </div>
+              <div className="p-10 md:p-14 print:p-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-10 print:grid-cols-3">
+                   {data.subjectAdvice.map((s, i) => (
+                     <div key={i} className="space-y-4">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-lg text-slate-900 font-bold text-sm">{s.subject}</div>
+                        <h4 className="font-bold text-lg text-slate-800 underline decoration-indigo-200 underline-offset-4">{s.focus}</h4>
+                        <p className="text-sm text-slate-500 leading-relaxed">{s.content}</p>
+                     </div>
+                   ))}
+                </div>
+                <div className="mt-12 p-8 bg-indigo-50 rounded-2xl border-2 border-indigo-100 flex gap-6 items-start print:mt-6 print:p-6">
+                   <div className="bg-indigo-600 text-white p-3 rounded-xl shadow-lg shrink-0"><Lightbulb size={24} /></div>
+                   <div><p className="text-indigo-900 font-bold text-lg mb-1 italic">💡 耶加專家提醒 (Pro-Tip)</p><p className="text-indigo-700 leading-relaxed font-medium">{data.proTip}</p></div>
+                </div>
+              </div>
             </div>
-        </div>
-
-        <div class="question-block">
-            <div class="q-title">Q7. 如果在學校可以讓你「自由選修」一堂課，你會選哪一種？</div>
-            <div class="options">
-                <label><input type="radio" name="q7" value="A"> (A) 選很難但學會後會變強的課。</label>
-                <label><input type="radio" name="q7" value="B"> (B) 選我有把握拿高分、可以展現優點的課。</label>
-                <label><input type="radio" name="q7" value="C"> (C) 選好玩、有趣的，跟考不考試無關。</label>
-                <label><input type="radio" name="q7" value="D"> (D) 選老師人好、氣氛輕鬆、容易過關的課。</label>
+            <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden print:rounded-3xl">
+              <div className="bg-emerald-600 p-10 text-white print:p-6">
+                <h3 className="text-2xl font-bold flex items-center gap-3"><Compass size={32} /> 2. 導師：{data.strategy2Title}</h3>
+                <p className="text-emerald-100 font-bold text-sm tracking-[0.2em] uppercase">{data.strategy2Tag}</p>
+              </div>
+              <div className="p-10 md:p-14 grid grid-cols-1 md:grid-cols-2 gap-12 print:p-8 print:grid-cols-2">
+                 {data.mentorStrategy.map((m, i) => (
+                   <div key={i} className="space-y-4">
+                     <h4 className="text-xl font-bold text-slate-800 flex items-center gap-2 border-b-2 border-emerald-100 pb-2">{m.title}</h4>
+                     <p className="text-base text-slate-500 leading-loose">{m.content}</p>
+                   </div>
+                 ))}
+              </div>
             </div>
-        </div>
+          </div>
+        </section>
 
-        <div class="question-block">
-            <div class="q-title">Q8. 當你覺得某一科怎麼讀都讀不懂時，你通常會？</div>
-            <div class="options">
-                <label><input type="radio" name="q8" value="A"> (A) 主動去尋求答案，不把它弄懂我會覺得怪怪的。</label>
-                <label><input type="radio" name="q8" value="B"> (B) 不敢問，怕顯得笨，試著自己硬背。</label>
-                <label><input type="radio" name="q8" value="C"> (C) 覺得課本編排不好，或老師講不清楚。</label>
-                <label><input type="radio" name="q8" value="D"> (D) 先放著，把時間拿去讀有把握的科目。</label>
+        {/* 家長教練式對話 */}
+        <section className="bg-slate-900 text-white rounded-[3rem] p-12 md:p-20 relative overflow-hidden shadow-2xl print:bg-slate-900 print:rounded-3xl print:p-10">
+          <div className="absolute top-0 right-0 p-10 opacity-5"><MessageCircle size={300} /></div>
+          <div className="relative z-10 max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold mb-8 text-center">💡 給家長的「教練式」陪伴建議</h2>
+            <div className="text-center mb-16 print:mb-8"><div className="text-2xl font-bold text-emerald-400 bg-white/5 inline-block px-10 py-5 rounded-full border border-white/10 shadow-2xl print:text-xl print:py-3 print:px-6" dangerouslySetInnerHTML={{__html: data.parentRole}}></div></div>
+            <div className="space-y-16 print:space-y-8">
+               {data.scripts.map((s, i) => (
+                 <div key={i} className="space-y-8 text-center">
+                   <span className="inline-block px-6 py-2 bg-white/10 rounded-full text-base font-bold text-slate-300 border border-white/5 tracking-widest">— {s.scene} —</span>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left mt-8 print:grid-cols-2">
+                      <div className="bg-white/5 p-8 rounded-3xl border border-white/10 print:p-6">
+                        <div className="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase mb-4 tracking-widest"><XCircle size={18} /> ❌ 避免回應方式</div>
+                        <p className="text-lg text-slate-400 italic leading-relaxed">「{s.bad}」</p>
+                      </div>
+                      <div className="bg-white p-8 rounded-3xl text-slate-900 shadow-2xl scale-105 border-2 border-emerald-400 print:p-6 print:scale-100">
+                        <div className="flex items-center gap-2 text-emerald-600 font-bold text-xs uppercase mb-4 tracking-widest"><CheckCircle2 size={18} /> ✅ 耶加專業建議</div>
+                        <p className="text-xl font-bold leading-loose text-slate-900 print:text-lg">「{s.good}」</p>
+                      </div>
+                   </div>
+                 </div>
+               ))}
             </div>
-        </div>
-        
-        <div class="question-block">
-            <div class="q-title">Q9. 如果老師當著大家的面，說你的作業寫得很不用心，你會？</div>
-            <div class="options">
-                <label><input type="radio" name="q9" value="A"> (A) 雖然丟臉，但我會檢查是不是真的有疏忽。</label>
-                <label><input type="radio" name="q9" value="B"> (B) 我覺得老師誤會我，明明大家都一樣，很想嗆回去。</label>
-                <label><input type="radio" name="q9" value="C"> (C) 覺得自己很糟糕，連這點小事都做不好。</label>
-                <label><input type="radio" name="q9" value="D"> (D) 聽聽就好，盡量不讓這件事影響心情。</label>
-            </div>
-        </div>
+          </div>
+        </section>
 
-        <div class="question-block">
-            <div class="q-title">Q10. 在什麼情況下，你會願意拿出 120% 的力氣去讀書？</div>
-            <div class="options">
-                <label><input type="radio" name="q10" value="A"> (A) 當我想挑戰自己極限在哪裡的時候。</label>
-                <label><input type="radio" name="q10" value="B"> (B) 當考好有具體獎勵，或有人關注我時。</label>
-                <label><input type="radio" name="q10" value="C"> (C) 當內容是我超感興趣的主題時。</label>
-                <label><input type="radio" name="q10" value="D"> (D) 當不讀書會有我不喜歡的後果時。</label>
-            </div>
-        </div>
+        {/* 未來趨勢預測 */}
+        <section className="bg-white rounded-[3rem] p-12 md:p-20 shadow-sm border border-slate-100 print:p-10 print:rounded-3xl">
+          <div className="flex flex-col items-center mb-16 text-center print:mb-8">
+            <h2 className="text-3xl font-bold mb-4 flex items-center gap-3 text-slate-900"><TrendingUp className="text-slate-400" size={32} /> 🚀 未來三年趨勢預測與耶加觀點</h2>
+            <p className="text-slate-500 max-w-2xl font-medium" dangerouslySetInnerHTML={{__html: data.trendIntro}}></p>
+          </div>
+          <div className="space-y-10 print:space-y-6">
+            {data.timeline.map((event, idx) => (
+              <div key={idx} className="flex flex-col md:flex-row gap-8 items-start relative group print:flex-row">
+                <div className="w-20 h-20 rounded-2xl bg-slate-900 text-white flex flex-col items-center justify-center shrink-0 shadow-lg print:w-16 print:h-16 print:shadow-none"><span className="text-xs font-bold opacity-60 uppercase">{event.grade}</span><span className="text-xl font-black italic print:text-lg">{event.phase}</span></div>
+                <div className="flex-1 bg-slate-50 p-8 rounded-3xl border border-slate-100 group-hover:bg-white group-hover:shadow-xl transition-all border-l-8 border-l-slate-900 print:p-6 print:rounded-2xl">
+                   <div className="flex flex-wrap items-center gap-4 mb-4"><h3 className="text-2xl font-bold text-slate-900 print:text-xl">{event.title}</h3><span className="px-3 py-1 bg-slate-200 text-[10px] font-black rounded-full text-slate-500 uppercase tracking-widest">{event.keyword}</span></div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print:grid-cols-2">
+                      <div className="space-y-2"><p className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><Info size={14}/> 核心趨勢 (Trend)</p><p className="text-base text-slate-600 leading-relaxed font-medium">{event.desc}</p></div>
+                      <div className="space-y-2"><p className="text-xs font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-2"><Target size={14}/> 耶加策略 (Strategy)</p><p className="text-base text-indigo-900 leading-relaxed font-bold">{event.strategy}</p></div>
+                   </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-        <button type="button" class="btn-submit" id="submitBtn" onclick="processQuiz()">查看我的大腦屬性</button>
-        <div class="loading" id="loadingText">正在分析數據並上傳資料庫，請稍候...</div>
-    </form>
-</div>
-
-<div class="container" id="result-area">
-    <div id="result-badge" class="type-badge">檢測結果</div>
-    <div id="result-title" class="type-title" style="color:var(--primary)"></div>
-    <div style="font-size:1.2rem; margin-bottom:10px;">嗨，<span id="display-name" style="font-weight:bold;"></span>！</div>
-    
-    <div class="type-desc">
-        <p><strong>✨ 你的特質：</strong><br><span id="result-traits"></span></p>
-        <p><strong>🔥 給你的超能力建議：</strong><br><span id="result-advice"></span></p>
+        {/* 底部結語 */}
+        <footer className="pt-20 print:pt-10">
+          <div className="bg-slate-50 rounded-[3rem] p-12 flex flex-col items-center text-center space-y-8 border border-slate-200 shadow-inner print:p-8 print:rounded-3xl">
+             <div className="flex gap-2 text-amber-400">{[1,2,3,4,5].map(i => <Award key={i} size={32} fill="currentColor" />)}</div>
+             <div className="max-w-3xl space-y-4">
+               <h3 className="text-2xl font-bold text-slate-900 italic underline decoration-emerald-300 underline-offset-8 decoration-4">🌟 耶加結語：</h3>
+               <p className="text-xl text-slate-600 leading-relaxed font-medium">{data.conclusion}</p>
+             </div>
+             <div className="w-24 h-1 bg-slate-200 rounded-full"></div>
+             <div className="flex flex-col items-center w-full gap-10 pt-8 px-10 text-center">
+                <div className="space-y-2">
+                   <p className="text-2xl font-bold text-slate-900 tracking-tighter">T-CRM 三元認知韌性 測評中心</p>
+                   <p className="text-sm text-slate-400 tracking-[0.4em] font-bold uppercase">Ternary Cognitive Resilience Evaluation Center</p>
+                </div>
+                <button onClick={onBack} className="text-slate-400 text-xs underline print:hidden">返回重新測試</button>
+             </div>
+          </div>
+        </footer>
+      </div>
     </div>
+  );
+};
 
-    <div class="advice-box">
-        <strong>💡 給爸爸媽媽的小提醒：</strong>
-        <p id="parent-advice" style="margin-top:5px; font-size:0.95rem;"></p>
+// --- 主應用程式 ---
+const App = () => {
+  const [page, setPage] = useState(0); 
+  const [studentName, setStudentName] = useState("");
+  const [answers, setAnswers] = useState({});
+  const [reportMeta, setReportMeta] = useState({ date: "", reportId: "" });
+
+  const questions = [
+    { id: 'q1', text: '想到即將開始的國中生活，你現在的心情比較接近哪一種？', options: [
+      { v: 'A', text: '(A) 終於長大了！我想在國中重新證明自己。' },
+      { v: 'B', text: '(B) 沒想太多，反正就是換個學校讀書。' },
+      { v: 'C', text: '(C) 聽說國中變難變嚴，我不確定能否適應。' },
+      { v: 'D', text: '(D) 最近覺得有點累，想先好好休息再說。' }
+    ]},
+    { id: 'q2', text: '回想一下國小的表現，再想想國中，你對自己的期許是？', options: [
+      { v: 'A', text: '(A) 我國小可能有點保留實力，國中我想拚一次！' },
+      { v: 'B', text: '(B) 我國小成績就不錯，國中保持水準就好。' },
+      { v: 'C', text: '(C) 我國小成績還可以，但有點擔心國中會掉下來。' },
+      { v: 'D', text: '(D) 不給自己太大壓力，能順利過關就好。' }
+    ]},
+    { id: 'q3', text: '數學老師發下一張「超級難」的加分挑戰題，全班沒幾個人會寫，這時你會想：', options: [
+      { v: 'A', text: '(A) 雖然很難，但我來試試看能不能解出來。' },
+      { v: 'B', text: '(B) 怕寫錯尷尬，先看看別人怎麼寫。' },
+      { v: 'C', text: '(C) 題目好像超出範圍了，不一定要現在寫。' },
+      { v: 'D', text: '(D) 與其卡在這裡，不如先休息一下。' }
+    ]},
+    { id: 'q4', text: '第一次段考成績比預期的低很多（考砸了），你心裡會想：', options: [
+      { v: 'A', text: '(A) 一定是我讀書方法哪裡要調整，我要找出來。' },
+      { v: 'B', text: '(B) 運氣不太好，考到不熟的，且改得嚴。' },
+      { v: 'C', text: '(C) 這種感覺不好受，懷疑自己不擅長這科。' },
+      { v: 'D', text: '(D) 沒關係，一次考試不代表全部，有及格就好。' }
+    ]},
+    { id: 'q5', text: '如果你這次考試分數大幅進步，大家都在拍手，你心裡真正的感覺是？', options: [
+      { v: 'A', text: '(A) 這證明我這陣子的努力是對的。' },
+      { v: 'B', text: '(B) 剛好猜中而已，不覺得下次還會這麼順利。' },
+      { v: 'C', text: '(C) 慘了...大家現在期望太高了，下次如果退步的話會很丟臉...' },
+      { v: 'D', text: '(D) 考得不錯，但我比較在意有沒有實質獎勵？' }
+    ]},
+    { id: 'q6', text: '老師派了一個「抄寫課文 3 遍」的作業，真的很無聊，但一定要交。你會怎麼做？', options: [
+      { v: 'A', text: '(A) 這是責任，趕快寫完再去玩。' },
+      { v: 'B', text: '(B) 字不用太漂亮，有交就好。' },
+      { v: 'C', text: '(C) 拖到最後一刻有感覺再寫，或賭賭看。' },
+      { v: 'D', text: '(D) 試試看計時挑戰，看能不能飆速寫完！' }
+    ]},
+    { id: 'q7', text: '如果在學校可以讓你「自由選修」一堂課，你會選哪一種？', options: [
+      { v: 'A', text: '(A) 選很難但學會後會變強的課。' },
+      { v: 'B', text: '(B) 選我有把握拿高分、可以展現優點的課。' },
+      { v: 'C', text: '(C) 選好玩、有趣的，跟考不考試無關。' },
+      { v: 'D', text: '(D) 選老師人好、氣氛輕鬆、容易過關的課。' }
+    ]},
+    { id: 'q8', text: '當你覺得某一科怎麼讀都讀不懂時，你通常會？', options: [
+      { v: 'A', text: '(A) 主動去尋求答案，不把它弄懂我會覺得怪怪的。' },
+      { v: 'B', text: '(B) 不敢問，怕顯得笨，試著自己硬背。' },
+      { v: 'C', text: '(C) 覺得課本編排不好，或老師講不清楚。' },
+      { v: 'D', text: '(D) 先放著，把時間拿去讀有把握的科目。' }
+    ]},
+    { id: 'q9', text: '如果老師當著大家的面，說你的作業寫得很不用心，你會？', options: [
+      { v: 'A', text: '(A) 雖然丟臉，但我會檢查是不是真的有疏忽。' },
+      { v: 'B', text: '(B) 我覺得老師誤會我，明明大家都一樣，很想嗆回去。' },
+      { v: 'C', text: '(C) 覺得自己很糟糕，連這點小事都做不好。' },
+      { v: 'D', text: '(D) 聽聽就好，盡量不讓這件事影響心情。' }
+    ]},
+    { id: 'q10', text: '在什麼情況下，你會願意拿出 120% 的力氣去讀書？', options: [
+      { v: 'A', text: '(A) 當我想挑戰自己極限在哪裡的時候。' },
+      { v: 'B', text: '(B) 當考好有具體獎勵，或有人關注我時。' },
+      { v: 'C', text: '(C) 當內容是我超感興趣的主題時。' },
+      { v: 'D', text: '(D) 當不讀書會有我不喜歡的後果時。' }
+    ]}
+  ];
+
+  const handleOptionChange = (qId, val) => {
+    setAnswers(prev => ({ ...prev, [qId]: val }));
+  };
+
+  const calculateRadarScores = (ans) => {
+    const valMap = { 'A': 10, 'B': 7, 'C': 4, 'D': 2 };
+    const m = (valMap[ans.q1] + valMap[ans.q2] + valMap[ans.q10]) / 3;
+    const g = (valMap[ans.q3] + valMap[ans.q7]) / 2;
+    const r = (valMap[ans.q6] + valMap[ans.q8]) / 2;
+    const e = (valMap[ans.q4] + valMap[ans.q9]) / 2;
+    const a = (valMap[ans.q4] + valMap[ans.q5]) / 2;
+    return [
+      { subject: '成就動機', value: Math.round(m * 10) },
+      { subject: '成長思維', value: Math.round(g * 10) },
+      { subject: '責任自律', value: Math.round(r * 10) },
+      { subject: '情緒韌性', value: Math.round(e * 10) },
+      { subject: '歸因傾向', value: Math.round(a * 10) }
+    ];
+  };
+
+  const processQuiz = () => {
+    if (!studentName.trim()) { alert("請先輸入你的名字喔！"); return; }
+    if (Object.keys(answers).length < 10) { alert("請完成所有題目再送出喔！"); return; }
+
+    const now = new Date();
+    const dateStr = `${now.getFullYear()} / ${String(now.getMonth() + 1).padStart(2, '0')} / ${String(now.getDate()).padStart(2, '0')}`;
+    const randomId = `YG-${now.getFullYear()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+    setReportMeta({ date: dateStr, reportId: randomId });
+
+    const counts = { A: 0, B: 0, C: 0, D: 0 };
+    for (let i = 3; i <= 10; i++) { if (answers['q'+i]) counts[answers['q'+i]]++; }
+    
+    let typeCode = "";
+    const maxScore = Math.max(counts.A, counts.B, counts.C, counts.D);
+    const maxOption = Object.keys(counts).find(key => counts[key] === maxScore);
+
+    if (maxOption === 'A') typeCode = "1";
+    else if (maxOption === 'C') typeCode = "3";
+    else {
+        if (answers.q7 === 'C' || answers.q10 === 'C' || (counts.D > 2 && answers.q6 === 'D')) typeCode = "5";
+        else if (answers.q7 === 'B' || answers.q10 === 'B' || answers.q5 === 'D') typeCode = "4";
+        else if (maxOption === 'D' && (answers.q7 === 'D' || answers.q10 === 'D')) typeCode = "6";
+        else typeCode = "2";
+    }
+    if (typeCode === "2" && counts.D > counts.B) typeCode = "6";
+
+    // 準備發送到 Google Sheets 的資料
+    const typeLabelMap = { "1": "A", "2": "B", "3": "C", "4": "D", "5": "E", "6": "F" };
+    const uploadData = {
+      name: studentName,
+      resultType: typeLabelMap[typeCode],
+      answers: answers,
+      scores: calculateRadarScores(answers).map(s => s.value),
+      date: dateStr,
+      reportId: randomId
+    };
+
+    fetch(googleScriptUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(uploadData)
+    }).then(() => console.log("Data sync success"))
+      .catch(err => console.error("Sync error:", err));
+
+    setPage(parseInt(typeCode));
+    window.scrollTo(0,0);
+  };
+
+  const renderPage = () => {
+    if (page === 0) return (
+      <div className="min-h-screen bg-[#f4f7f6] py-16 px-4 font-sans">
+        <div className="max-w-[750px] mx-auto bg-white p-12 rounded-[2.5rem] shadow-2xl border border-slate-100">
+          <h1 className="text-[#4A90E2] text-center text-4xl font-black mb-4 tracking-tight">🚀 國中戰力潛能分析</h1>
+          <p className="text-center text-slate-500 text-lg mb-12 font-medium">這不是考試，沒有標準答案。<br/>請依照你「最近最真實的感覺」選出最像你的選項！</p>
+          
+          <div className="bg-[#eef5ff] p-10 rounded-3xl border-2 border-[#d6e4ff] mb-12 shadow-sm">
+             <label className="block font-black mb-4 text-[#2c3e50] text-xl">👋 嗨！請問你的名字是？</label>
+             <input 
+               type="text" 
+               className="w-full p-5 border-2 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none border-blue-100 transition-all font-bold text-xl" 
+               placeholder="請輸入姓名..." 
+               value={studentName}
+               onChange={(e) => setStudentName(e.target.value)}
+             />
+          </div>
+
+          <div className="space-y-16">
+            {questions.map((q, idx) => (
+              <div key={q.id} className={`${idx < 2 ? 'border-b-2' : ''} border-slate-50 pb-12`}>
+                {idx === 2 && <p className="text-center text-slate-400 font-black text-xl mb-12 py-4 bg-slate-50 rounded-full italic tracking-widest">🧠 進入大腦反應測試區</p>}
+                <p className="font-black mb-8 text-[#2c3e50] text-2xl leading-relaxed flex gap-4">
+                  <span className="text-blue-500 opacity-30">{idx + 1}.</span>
+                  {q.text}
+                </p>
+                <div className="grid grid-cols-1 gap-4">
+                  {q.options.map(opt => (
+                    <label key={opt.v} className={`block p-6 border-2 rounded-[1.5rem] cursor-pointer transition-all flex items-center gap-4 ${answers[q.id] === opt.v ? 'bg-blue-50 border-blue-400 shadow-md ring-2 ring-blue-100' : 'bg-slate-50 border-transparent hover:bg-slate-100 hover:border-slate-200'}`}>
+                      <input 
+                        type="radio" 
+                        name={q.id} 
+                        className="w-6 h-6 accent-blue-600 shrink-0" 
+                        checked={answers[q.id] === opt.v}
+                        onChange={() => handleOptionChange(q.id, opt.v)}
+                      /> 
+                      <span className={`text-xl font-bold ${answers[q.id] === opt.v ? 'text-blue-900' : 'text-slate-600'}`}>{opt.text}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button onClick={processQuiz} className="w-full bg-[#4A90E2] text-white p-8 rounded-[2rem] mt-16 font-black text-3xl shadow-xl hover:shadow-2xl hover:bg-[#357abd] hover:-translate-y-1 active:translate-y-0 transition-all flex items-center justify-center gap-4 group">
+            查看我的大腦屬性
+            <ChevronRight className="group-hover:translate-x-2 transition-transform" size={32} />
+          </button>
+        </div>
+      </div>
+    );
+
+    const mockReports = {
+      1: { 
+        name: studentName, date: reportMeta.date, reportId: reportMeta.reportId,
+        typeTitle: "🟢 A 型 — 成長型挑戰者 (The Challenger)", 
+        colorClass: { bg: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-100" },
+        radarData: calculateRadarScores(answers),
+        coreDiagnostic: "孩子的心理結構穩定，具備極高的「自我校準」能力。",
+        alert: "社交協作與彈性休息（同理心與降壓）是未來三年需重點補強的區塊。",
+        resilienceGrade: "Elite Level", typeIntro: "屬於最具備「精英基底」的類型。",
+        mechanics: [
+          { title: "後設認知能力 (Metacognition)", desc: "他不只是在讀書，他會不斷監控自己的學習狀態。這類孩子在面對國二、國三難度驟增的理化與數學時，通常能維持穩定，因為他們不會被挫折擊垮，而是會主動尋找「新的解題策略」。" },
+          { title: "抗壓韌性 (Resilience)", desc: "他將失敗定義為「數據回饋」。這種特質讓他在大型模擬考（如會考）中，心理穩定度遠高於一般學生。" }
+        ],
+        dualTeacherIntro: "我們不只是給予課程，我們提供的是「學術教練」與「心理導師」的協作系統。",
+        dualTeacherSlogan: "我們是這台跑車的「技師」與「導航員」",
+        strategy1Title: "英數理三科的高階對策", strategy1Tag: "實施「認知負載」進階訓練",
+        subjectAdvice: [
+          { subject: "英文科", focus: "從語感轉化為邏輯解析", content: "A 型學生通常語感不錯，但我們要求建立「語法地圖」。除了基礎單字，導入外媒閱讀與長難句拆解，確保在會考素養閱讀中精準抓到陷阱。" },
+          { subject: "數學科", focus: "從算對轉化為策略遷移", content: "對於已熟練單元不重複練習。提供「一題多解」與「逆向推導」挑戰，訓練陌生題型的遷移能力，將「解題」提升至「邏輯推演」。" },
+          { subject: "理化科", focus: "從記憶轉化為科學建模", content: "強調「現象背後的原理」。引導建立「物理模型」，讓他能用一套邏輯推導出多個公式，在實驗題型中強化變因控制分析。" }
+        ],
+        strategy2Title: "啟發動機與教練式身心引導", strategy2Tag: "啟發「領袖格局」與「心流管理」",
+        mentorStrategy: [
+           { title: "動機啟發：數據分析師的角色", content: "透過 1-on-1 對話，協助他設定「跳一跳才夠得著」的目標，避免他在舒適圈中停滯。導師會扮演這台超跑的數據分析師。" },
+           { title: "身心平衡：處理完美主義內耗", content: "隨時觀測 A 型學生是否出現「過度自我鞭策」的徵兆。當他因 1-2 分過糾結時，教導他如何處理完美主義帶來的內耗，強化心理韌性。" }
+        ],
+        proTip: "A 型學生最不需要的是『填鴨』，最需要的是『空間』。在耶加，我們給予他 20% 的自主探究空間，讓他在導師的引導下，學會如何管理自己的天賦。",
+        parentRole: "您的角色是<span class='text-white underline decoration-emerald-400'>「底座」</span>，讓鑽石能安心閃耀。",
+        scripts: [
+          { scene: "當孩子因為錯失 1 分而極度自責時", bad: "才 1 分而已，別太在意。", good: "我看到你對這 1 分的執著，這就是你優秀的原因。我們一起來拆解：這是「觀念缺口」還是「流程失誤」？如果是後者，我們下次優化檢查機制即可。" },
+          { scene: "當孩子熬夜讀書，拒絕休息時", bad: "快去睡覺，身體比讀書重要。", good: "科學研究顯示，大腦在睡眠中會進行記憶歸檔. 現在去睡覺不是偷懶，是為了讓你明天的反應速度維持在巔峰，這叫「戰略型睡眠」。" }
+        ],
+        trendIntro: "A 型學生在國中階段的成功並非取決於「努力」，而在於能否在難度跳躍時完成<span class='text-slate-900 font-bold'>「認知升級」</span>。",
+        timeline: [
+          { grade: "Grade 7", phase: "G1", title: "【鞏固期】—— 預防「窄化學習」", keyword: "學術深度", desc: "由於基礎課程較簡單，容易產生輕敵心理或僅追求標準答案。", strategy: "建立跨學科邏輯框架，確保不因粗心失分，養成「後設認知」筆記習慣。" },
+          { grade: "Grade 8", phase: "G2", title: "【震盪期】—— 應對「理化瓶頸」", keyword: "科學思維", desc: "理化科加入後抽象概念增加，可能遇到人生第一次「讀了卻不懂」的挫折。", strategy: "導入「科學化實驗思維」，將失敗轉化為數據除錯，快速渡過磨合期。" },
+          { grade: "Grade 9", phase: "G3", title: "【爆發期】—— 爭取「精準卓越」", keyword: "精準目標", desc: "面對全範圍複習，常會因為想「面面俱到」而導致效率下降。", strategy: "集中 80% 精力在 20% 高階變形題，穩定發揮 A++ 的第一志願實力。" }
+        ],
+        conclusion: "您的孩子是一顆具備強大光芒的鑽石。在耶加，我們不只負責磨亮他的學術表現，更致力於為他打造一個穩定的心理底座，讓他能閃耀得更久、更遠。"
+      },
+      2: { 
+        name: studentName, date: reportMeta.date, reportId: reportMeta.reportId,
+        typeTitle: "🟡 B 型 — 熱情型行動者 (The Activist)", 
+        colorClass: { bg: "bg-amber-50", text: "text-amber-600", border: "border-amber-100" },
+        radarData: calculateRadarScores(answers),
+        coreDiagnostic: "能量極高，但「穩定度」與「自我檢視」是關鍵弱點。",
+        alert: "反思邏輯處於警示區！容易忽略細節，錯誤發生時傾向向外找理由。",
+        resilienceGrade: "Strategic Level", typeIntro: "展現了極強的「啟動能」，但缺乏「巡航能」。",
+        mechanics: [
+          { title: "「自我跛足」防衛機制", desc: "為了維護「我很聰明」的形象，B 型孩子有時會潛意識裡不徹底準備。這樣考不好時，他就能說「是因為我沒讀完」或「題目太爛」，而非「我不行」。這是一種隱形的進步阻力。" },
+          { title: "情緒主導認知", desc: "他在喜歡的科目或老師面前表現驚人；但一旦受挫或不感興趣，表現會直線下滑。他的學業成效呈現「大起大落」的雲霄飛車狀態。" }
+        ],
+        dualTeacherIntro: "B 型學生不缺「動力」，缺的是「精準的航向」與「紮實的底盤」。",
+        dualTeacherSlogan: "我們負責把「衝勁」導向「結果」，讓熱情不再是三分鐘熱度。",
+        strategy1Title: "英數理三科的防漏策略", strategy1Tag: "實施「強制覆盤、邏輯閉環」教學",
+        subjectAdvice: [
+          { subject: "英文科", focus: "從「感覺派」轉向「結構派」", content: "老師會強化其「語法抓漏訓練」，要求在答題時圈出關鍵字與語法線索，強迫其大腦從「直覺」轉向「分析」，預防長篇閱讀失誤。" },
+          { subject: "數學科", focus: "從「跳步算」轉向「步步為營」", content: "要求實施「解題履歷制」，過程必須分段明確。針對幾何題目，要求他口述證明邏輯，確保是真內化概念，而非套用公式碰運氣。" },
+          { subject: "理化科", focus: "從「看熱鬧」轉向「懂門道」", content: "引導他擔任實驗演示者，但演示後必須進行「原理覆盤」。將抽象公式與具體現象強力連結，讓他無法用「運氣」敷衍過去。" }
+        ],
+        strategy2Title: "啟發動機與教練式身心引導", strategy2Tag: "行車記錄器與校正員的角色",
+        mentorStrategy: [
+           { title: "行為指標校正：證據導向", content: "針對「外歸因」慣性，導師面談時會攤出售後檢測數據，溫柔地指出：「這題型我們練過三次，是哪個環節你當時覺得不需要再複習？」" },
+           { title: "情緒穩定劑：日常微習慣", content: "協助他建立日常微習慣，在情緒大起大落中提供穩定支持。讓他明白：一時成功不代表結束，關鍵在於明天的計畫是什麼。" }
+        ],
+        proTip: "對於 B 型學生，『被看見』與『被要求』同樣重要。在耶加，我們給予他舞台展示熱情，但也同時給予他一套不能妥換的規範，這才是真正對他的潛力負責。",
+        parentRole: "您的角色是<span class='text-white underline decoration-amber-400'>「緩衝器」與「方向盤」</span>，引導他看清路況。",
+        scripts: [
+          { scene: "當孩子抱怨「這次題目出太爛、太偏」導致考差時", bad: "不要找藉口，沒考好就是沒考好。", good: "我也覺得這次出題很有趣。既然題目這麼『偏』，你有沒有發現哪一個章節是你原本覺得懂了，但被這種題目一考才發現還有漏洞的？這題是個很好的檢測器耶。" },
+          { scene: "當孩子表現得興致勃勃，卻只有三分鐘熱度時", bad: "你每次都這樣，只有一開始認真。", good: "我看到你一開始的動力很強，這非常棒。我們來挑戰一下，把這股能量切成小塊。這禮拜我們只專注完成這個小目標，達成了我們就來慶祝這種『持續力』。" }
+        ],
+        trendIntro: "B 型學生的國中生涯是一場「紀律與誘惑」的拉鋸戰。若能建立穩定的回饋機制，他們能從<span className='text-slate-900 font-bold'>「煙火型選手」轉化為「恆星型選手」</span>。",
+        timeline: [
+          { grade: "Grade 7", phase: "G1", title: "【適應期】—— 預防「虛假繁榮」", keyword: "習慣定型", desc: "國一內容銜接國小較多，B 型學生憑藉小聰明能輕鬆拿高分，易產生不用努力的錯覺。", strategy: "嚴格要求作業繳交品質與時效，不讓他在簡單題目中養成惡習，預防國二後斷崖下跌。" },
+          { grade: "Grade 8", phase: "G2", title: "【警示期】—— 克服「挫折逃避」", keyword: "歸因再訓練", desc: "理化幾何難度陡升，遇到挫折會啟動外歸因防衛（如怪罪老師或題目），重心轉向社交。", strategy: "透過科學化診斷拆解錯誤，讓他看見「只要多做這一步結果就不同」，將注意力拉回行為優化。" },
+          { grade: "Grade 9", phase: "G3", title: "【衝刺期】—— 啟動「成就循環」", keyword: "短週期目標", desc: "面對全範圍複習，容易因為排名波動而心情起伏，導致複習節奏混習。", strategy: "利用好勝特質將大會考切成多個小戰場，透過不斷的小勝累積成就感，確保衝刺期高昂戰力。" }
+        ],
+        conclusion: "B 型的孩子是一團火，能照亮自己也能溫暖他人. 耶加的任務是為這團火架設一個「爐灶」，讓能量不外洩，轉化為持續前進的動力。"
+      },
+      3: { 
+        name: studentName, date: reportMeta.date, reportId: reportMeta.reportId,
+        typeTitle: "🔵 C 型 — 專注型完美者 (The Perfectionist)", 
+        colorClass: { bg: "bg-blue-50", text: "text-blue-600", border: "border-blue-100" },
+        radarData: calculateRadarScores(answers),
+        coreDiagnostic: "執行力極強，但「心理安全感」與「失敗容忍度」處於紅燈警戒區。",
+        alert: "這是班級中最容易出現「身心症狀」（如考前頭痛、失眠）的群體。極度害怕透過「失敗」證明自己不聰明。",
+        resilienceGrade: "Stability Focus", typeIntro: "展現了極高的學術產出，但心理負擔過重。",
+        mechanics: [
+          { title: "「高壓資優生」症候群", desc: "C 型孩子常陷入「表現目標」而非「學習目標」。他們讀書是為了「不掉下來」，而非「想變強」。這種恐懼驅動的學習，會導致他在面對大範圍模擬考時，因過度焦慮而發揮失常。" },
+          { title: "僵化的錯誤認知", desc: "對他而言，錯誤不是學習的階梯，內容對自我價值的「否定」。這種特質讓他不敢嘗試具挑戰性的新方法，寧可死背硬記來換取安定感。" }
+        ],
+        dualTeacherIntro: "C 型學生需要的不是「更努力」，而是「更安全地去嘗試」。",
+        dualTeacherSlogan: "我們是孩子的「安全氣囊」，教導他如何在高速競爭中優雅著陸。",
+        strategy1Title: "英數理三科的降壓策略", strategy1Tag: "實施「策略優先、結果第二」教學",
+        subjectAdvice: [
+          { subject: "英文科", focus: "從「背誦單字」轉向「情境預測」", content: "訓練其「上下文聯想力」，教他如何忽略無效資訊，專注長篇閱讀結構。降低其因「求全心理」導致的閱讀速度過慢。" },
+          { subject: "數學科", focus: "從「套用公式」轉向「容許解錯」", content: "引導使用「思考導圖」，即便最後答案錯了，只要邏輯對了就給予肯定. 示範多種「失敗的嘗試」，讓他看到老師也是在錯誤中找到路徑。" },
+          { subject: "理化科", focus: "從「定義記憶」轉向「動態建模」", content: "透過「可視化實驗」與「類比法」建立動態概念（如電流類比水流）。打破對「文字定義」的依賴，減輕背不熟的焦慮感。" }
+        ],
+        strategy2Title: "啟發動機與教練式身心引導", strategy2Tag: "避風港與減震器的角色",
+        mentorStrategy: [
+           { title: "重新定義成功：主動詢問挫折", content: "在週約談時主動慶祝「對挫折的覺察」。告訴他：「看見問題，就是變強的開始。」有效緩解他的內化歸因壓力。" },
+           { title: "心流與降壓：結構化清單管理", content: "針對考前焦慮，導入「呼吸法」與「行動清單管理」。讓他感到一切都在控制之中，從而恢復應有的實力。" }
+        ],
+        proTip: "對於 C 型學生，『勇氣』比『分數』更難得。在耶加，我們不只給予孩子知識，我們給予他『就算考差了，家長與老師依然支持我』的安全感。",
+        parentRole: "您的角色是<span class='text-white underline decoration-blue-400'>「安全墊」</span>，讓鑽石能安心閃耀。",
+        scripts: [
+          { scene: "當孩子拿著 92 分考卷卻因為錯 8 分而自責時", bad: "考這樣已經很好了，不要鑽牛角尖。", good: "我看到你對這 1 分的執著，這就是你優秀的原因。我們一起來拆解：這是「觀念缺口」還是「流程失誤」？如果是後者，我們下次優化檢查機制即可。" },
+          { scene: "考前焦慮到失眠、食慾不振時", bad: "放輕鬆，不要想太多。", good: "看起來大腦的保險絲有點過熱了。我們現在暫停 15 分鐘去散步。這不是浪費時間，是為了讓你的『大腦記憶體』重新開機. 你的認真就已經贏過很多人了。" }
+        ],
+        trendIntro: "C 型學生的國中三年是一場「鬆綁與重建」的過程. 如果不打破<span class='text-slate-900 font-bold'>「完美主義」的枷鎖</span>，高效率將演變成高內耗。",
+        timeline: [
+          { grade: "Grade 7", phase: "G1", title: "【適應期】—— 預防「過度負荷」", keyword: "認知減法", desc: "為了維持小學高分，會花兩倍時間讀書並犧牲睡眠，埋下國二崩潰隱憂。", strategy: "介入時間分配，區分「重點」與「裝飾」，強制要求休息時間，建立有彈性的優異。" },
+          { grade: "Grade 8", phase: "G2", title: "【危機期】—— 面對「容錯挑戰」", keyword: "錯誤脫敏", desc: "理化幾何庫的抽象感會讓追求正解的孩子崩潰，易定義自己為「笨」，出現失眠頭痛。", strategy: "給予「犯錯的特權」，理解國中理數本質是邏輯推演而非精準複刻。" },
+          { grade: "Grade 9", phase: "G3", title: "【考驗期】—— 強化「抗壓穩定度」", keyword: "策略診斷", desc: "面對模考排名，易陷入難題鑽牛角尖導致整張考卷寫不完。", strategy: "教導如何「戰略性放棄」部分難題，確保基本盤穩固，從心理層面降低失常風險。" }
+        ],
+        conclusion: "C 型的孩子是一條緊繃的弦，能彈奏出最優美的樂章，但也最容易斷裂. 耶加的任務是教導他如何「調弦」，讓他學會彈性與放鬆，跑得比誰都穩健。"
+      },
+      4: { 
+        name: studentName, date: reportMeta.date, reportId: reportMeta.reportId,
+        typeTitle: "🟠 D 型 — 表現型堅持者 (The Performer)", 
+        colorClass: { bg: "bg-orange-50", text: "text-orange-600", border: "border-orange-100" },
+        radarData: calculateRadarScores(answers),
+        coreDiagnostic: "動力來自於「被看見」，「外在認同」是其最強大的能量來源，也是最脆弱的軟肋。",
+        alert: "容易產生「形象焦慮」，若任務太難可能導致其為了「怕丟臉」而出現消極防衛。",
+        resilienceGrade: "Social Focus", typeIntro: "屬於「高度社交驅動」的學習者。",
+        mechanics: [
+          { title: "「外塑型」動機結構", desc: "學習初衷往往是為了讓父母開心或在同學面前有面子。這種動機在國一有效，但進入高壓期後，若缺乏「內在價值」支撐，容易因挫折感大於成就感而突然崩潰。" },
+          { title: "防衛性避難", desc: "當他感覺某個科目「無論怎麼努力都無法表現出色」時，他可能會選擇放棄，並表現出不在乎的樣子，以掩飾內心的自卑。" }
+        ],
+        dualTeacherIntro: "D 型學生需要的不是「說教」，應是「觀眾」與「掌聲」。",
+        dualTeacherSlogan: "我們為他搭設舞台，同時教導他在幕後如何獨自強大。",
+        strategy1Title: "英數理三科的「舞台式」教學", strategy1Tag: "實施「公開肯定、私下除錯」",
+        subjectAdvice: [
+          { subject: "英文科", focus: "從「背單字」轉向「表達秀」", content: "鼓勵在課堂進行「情境對話演練」。當他在眾人面前展現流利語感時，會極大化其對學科認同感，從而願意投入枯燥的文法鑽研。" },
+          { subject: "數學科", focus: "從「算出答案」轉向「解題分享」", content: "邀請上台分享「獨特的解題思路」。為了表現完美，他會私下反覆推導步驟。老師透過肯定的語言，讓他將數學與「自信」連結。" },
+          { subject: "理化科", focus: "從「死背公式」轉向「原理展示」", content: "利用其喜歡「被需要」的特性，擔任「實驗小助手」。在協助演示中，責任感會迫使他深入理解抽象原理才不會在台上出錯。" }
+        ],
+        strategy2Title: "啟發動機與教練式身心引導", strategy2Tag: "經紀人與領航員的角色",
+        mentorStrategy: [
+           { title: "精準過程讚美：看見細節付出", content: "導師針對他「堅持留下來問問題」或「筆記風格」等細節行為給予高強度回饋. 讓他明白老師看到的不是只有成績，還有他的付出。" },
+           { title: "心理防衛解碼：安全洩壓空間", content: "當表現出叛逆時，導師能一眼看穿其「怕丟臉」的心理。透過 1-on-1 對話告訴他：「在耶加，你可以不完美，我們是你的隊友，不是評審。」" }
+        ],
+        proTip: "對於 D 型學生，『被肯定』就是他的氧氣。在耶加，我們不只要求他的成績，我們更在乎他的『光彩』。當他學會不再為別人眼光讀書，他將成為無堅不摧的戰士。",
+        parentRole: "您的角色是<span class='text-white underline decoration-orange-400'>「頭號粉絲」</span>，更是引導他「看見自己」的明燈。",
+        scripts: [
+          { scene: "當孩子因為考好而興奮尋求稱讚時", bad: "考得好是應該的，不要太自滿。", good: "看到你拿到這個分數，我感受到你的堅持都有了回報！我好奇你在準備過程中，哪一個部分讓你覺得最有成就感？" },
+          { scene: "當孩子因為考差丟臉不敢面對家人時", bad: "考差就考差，有什麼好丟臉的？", good: "我知道你對自己要求很高，這次結果讓你有點難受。但我最看重的不是數字，而是你即便覺得難仍堅持寫完它的那份『帥氣』。" }
+        ],
+        trendIntro: "D 型學生的國中三年是一場「認同轉型」。若能將<span class='text-slate-900 font-bold'>「演給別人看」</span>的動力轉向為自己而戰，他們能爆發強大韌性。",
+        timeline: [
+          { grade: "Grade 7", phase: "G1", title: "【高峰期】—— 利用「光環效應」", keyword: "行為內化", desc: "通常表現積極，想建立「優等生」形象。只要老師給予掌聲，會維持高度配合。", strategy: "賦予「小老師」或「組長」職責，讓他在幫助他人中感受到成就感，穩定學習習慣。" },
+          { grade: "Grade 8", phase: "G2", title: "【波動期】—— 預防「形象崩壞」", keyword: "私下輔導", desc: "理數難度增加，若考不到領先群會產生強烈「恥辱感」，可能裝作不在乎或逃避檢視。", strategy: "採取「私下高度肯定、公開適度保護」策略，給予隱形階梯（補強），讓他私下變強再發光。" },
+          { grade: "Grade 9", phase: "G3", title: "【衝刺期】—— 轉向「競爭驅動」", keyword: "榮譽管理", desc: "會因為想進入「第一志願」的榮譽感而拼命. 但需警惕若排名不如預期會短期消沉。", strategy: "設定可達成的階段性排位目標，將每一場考試視為一場「贏過昨天自己」的華麗表演。" }
+        ],
+        conclusion: "D 型的孩子是天生的表演者，生命需要掌聲. 耶加的任務是教導他在沒有掌聲的黑夜裡，依然能看見自己發出的光。"
+      },
+      5: { 
+        name: studentName, date: reportMeta.date, reportId: reportMeta.reportId,
+        typeTitle: "🩵 E 型 — 潛能型探索者 (The Explorer)", 
+        colorClass: { bg: "bg-cyan-50", text: "text-cyan-600", border: "border-cyan-100" },
+        radarData: calculateRadarScores(answers),
+        coreDiagnostic: "具備強大的「認知硬體」，但「系統作業驅動（學習動機）」尚未啟動，對傳統課業存在高度的「意義感缺失」。",
+        alert: "若不介入引導，極容易在國二發展成「課堂客人」或「科技成癮」，浪費了天賦。",
+        resilienceGrade: "Cognitive Potential", typeIntro: "屬於「價值導向型」的學習者。",
+        mechanics: [
+          { title: "「低動機、高能力」的矛盾", desc: "E 型孩子並非「學不會」，而是「不想學」。他們通常用「不努力」來作為一種自我保護——只要我不努力，我就永遠可以維持「我很聰明，只是不想讀」的優越感。" },
+          { title: "尋找「現實連結」", desc: "對碎片化、死背的知識極度排斥。他們需要看到學科知識在現實世界中的「應用價值」或「邏輯美感」，否則他們的大腦會自動關閉接收。" }
+        ],
+        dualTeacherIntro: "E 型學生不需要「標準答案」，他們需要的是「為什麼」。",
+        dualTeacherSlogan: "我們不把他當成學生，我們把他當成未來的科學家與工程師。",
+        strategy1Title: "英數理三科的「實戰化」教學", strategy1Tag: "採取「降維打擊、反向推導」",
+        subjectAdvice: [
+          { subject: "英文科", focus: "從「語法結構」轉向「資訊工具」", content: "引導閱讀科技趨勢或國外論壇. 讓他發現英文是獲取最新資訊的「鑰匙」。當他為了看懂內容而查字典時，語法自然會內化。" },
+          { subject: "數學科", focus: "從「算式訓練」轉向「邏輯破解」", content: "給予非典型難題或激將法：「這題有極簡解法，你找得到嗎？」讓他在追求邏輯破解的過程中，練就深厚的解題功力。" },
+          { subject: "理化科", focus: "從「公式套用」轉向「第一原理」", content: "從根本物理現象出發，挑戰課本簡化描述. 透過「火箭軌道」等真實模擬，讓他覺得理化是掌控世界的「說明書」。" }
+        ],
+        strategy2Title: "啟發動機與教練式身心引導", strategy2Tag: "策略顧問與談判專家的角色",
+        mentorStrategy: [
+           { title: "目標交換協議：成人對成人", content: "不談成績，談「選擇權」。讓他明白現在這幾科及格，是拿到未來夢想專題門票的「最低代價」，建立目標交換。" },
+           { title: "人生遊戲化：數位專注管理", content: "不採取禁止，而是教導「專注力管理」。教他使用數位工具監控心流，讓他覺得自我管理也是一種有趣的挑戰。" }
+        ],
+        proTip: "對於 E 型學生，『意義』大於一切。在耶加，我們致力於讓他發現學科知識能賦予他更強大的視角去解析世界，這將產生核爆級的能量。",
+        parentRole: "您的角色是<span class='text-white underline decoration-cyan-400'>「合夥人」</span>而非「監工」，重點在於「溝通意義」。",
+        scripts: [
+          { scene: "當孩子抱怨「學公式以後又用不到」時", bad: "大家都要學，你就乖乖學就對了。", good: "你說得對，公式不一定會用到。但在解題時，你的大腦正在鍛鍊『邏輯拆解』能力，這跟你研究遊戲攻略的邏輯是一樣的。我不在乎公式，我在乎你聰明的頭腦有沒有被磨得更利。" },
+          { scene: "當孩子因沉迷數位興趣而荒廢功課時", bad: "就是因為整天玩這個，成績才這麼爛！", good: "我看到你在這領域鑽研很深，令人佩服。但身為合夥人，我擔心你的『基本盤』不穩會限制未來發展。我們討論一下如何分配時間拿到那幾張『通行證』？" }
+        ],
+        trendIntro: "E 型學生的國中三年是一場「意義狩獵」。如果沒能掛鉤現實興趣，他們會將天賦耗散在虛擬世界中。",
+        timeline: [
+          { grade: "Grade 7", phase: "G1", title: "【觀望期】—— 預防「動力斷層」", keyword: "認知擴充", desc: "由於課程直觀，常靠天賦維持及格，但也因此覺得學校沒什麼好學的，導致習慣荒廢。", strategy: "提供課外延伸題或科普背景，讓他在學科中看到世界的複雜度，引發好奇心，避免關機。" },
+          { grade: "Grade 8", phase: "G2", title: "【分水嶺】—— 轉化「叛逆」為「研究」", keyword: "專題導向", desc: "理化難度提升，若維持不讀書的傲慢會踢到鐵板，易產生負面歸因覺得制度太爛。", strategy: "導入專題導向學習（PBL），讓他從受教者變研究者，給予自主權，讓他為了解決問題而補足基礎。" },
+          { grade: "Grade 9", phase: "G3", title: "【爆發期】—— 鎖定「效率攻頂」", keyword: "戰略計畫", desc: "若能覺醒，衝刺速度會是全班之冠。但若沒覺醒，則會徹底放棄，成為隱形失蹤者。", strategy: "不要求刷題，而是教他「拆解命題邏輯」，將會考看作一場心理博弈，激發挑戰欲。" }
+        ],
+        conclusion: "E 型的孩子是未來的開拓者，他們的大腦天生不為平庸的重複而設計. 耶加的任務是為這台高級超跑鋪設一條「通往未來的賽道」，讓他的聰明才智不再空轉。"
+      },
+      6: { 
+        name: studentName, date: reportMeta.date, reportId: reportMeta.reportId,
+        typeTitle: "🩶 F 型 — 支持型學習者 (The Supporter)", 
+        colorClass: { bg: "bg-slate-100", text: "text-slate-600", border: "border-slate-200" },
+        radarData: calculateRadarScores(answers),
+        coreDiagnostic: "處於「習得性無助」狀態，學習動力嚴重不足，核心問題在於極低的「自我效能感」。",
+        alert: "這類孩子最怕被標籤化為「懶惰」。其實他們不是懶，是因極度害怕挫折而產生的「情感凍結」。",
+        resilienceGrade: "Support Critical", typeIntro: "屬於「急需心理重建」的學習者。",
+        mechanics: [
+          { title: "「習得性無助」的循環", desc: "可能在國小中高年級經歷過長期挫敗，大腦演化出「放棄」機制——只要我不努力，失敗就歸咎於「沒做」，而非「我真的很笨」。這是一種防衛機制。" },
+          { title: "高敏感的社交雷達", desc: "對大人的語氣、眼神極其敏感。任何一點點失望的眼神，都會讓他們退縮得更深。他們需要的是「無條件的正向支持」，而非「條件式的獎勵」。" }
+        ],
+        dualTeacherIntro: "F 型學生需要的不是「名師」，而是「能陪他走一段路的戰友」。",
+        dualTeacherSlogan: "我們不協助他奔跑，我們牽著他的手，從「站穩」開始。",
+        strategy1Title: "英數理三科的「低門檻」教學", strategy1Tag: "採取「極簡主義、高頻獎勵」",
+        subjectAdvice: [
+          { subject: "英文科", focus: "從「背一長串」轉向「認出關鍵字」", content: "訓練「單字視覺化」，利用圖像對應。不要求全篇看懂，只要認出三個單字就能選對答案。當恐懼感降低時，學習動機才會啟動。" },
+          { subject: "數學科", focus: "從「計算訓練」轉向「工具使用」", content: "教導「判讀題型」。透過「SOP 式的直覺反應」訓練，跳過痛苦的複雜推導，先拿到分數建立尊嚴，再回頭補強觀念。" },
+          { subject: "理化科", focus: "從「符號運算」轉向「生活觀察」", content: "將實驗日常化（如拿熱可可討論熱量）。讓理化變成「有溫度的知識」，降低對物理符號的排斥感，使其大腦不再對公式「過敏」。" }
+        ],
+        strategy2Title: "啟發動機與教練式身心引導", strategy2Tag: "拖吊車與加油站的角色",
+        mentorStrategy: [
+           { title: "「無條件正向」：建立關係存款", content: "每週進行一次「非學術面談」，聊興趣與午餐。讓孩子覺得功課不好也是被喜歡的. 這份情感存款是他在課堂堅持下去的唯一動力。" },
+           { title: "歸因再訓練：放大微型成功", content: "當考出進步時，導師會放大這個進步並連結到「策略有效」。透過一次次微小的歸因轉移，瓦解他根深蒂固的「笨蛋基因說」。" }
+        ],
+        proTip: "對於 F 型學生，『陪伴』就是最有力的教案。在耶加，我們不放棄任何孩子。當全世界都對他搖頭時，耶加老師會站在他身旁，幫他擋住壓力。",
+        parentRole: "您的角色是<span class='text-white underline decoration-slate-400'>「避風港與啦啦隊」</span>，請給予他犯錯的特權。",
+        scripts: [
+          { scene: "當孩子考了不及格，垂頭喪氣（或裝作不在乎）時", bad: "你就是不讀書才會這樣，到底要講幾次？", good: "這考卷看起來確實難. 但發現你這幾題基礎題寫對了，代表你這部分的觀念是穩的。分數只是數字，我更在意你今天坐在考場寫完它的勇氣。我們下次多弄懂一題就好。" },
+          { scene: "當孩子想放棄，說出「我反正就是笨、學不會」時", bad: "你不笨，你只是不努力。", good: "聽你這樣說我覺得很心疼. 那種努力也沒用的感覺一定很累. 但大腦像肌肉會成長，我們不用跟別人比，只跟昨天的自己比，我會一直陪著你。" }
+        ],
+        trendIntro: "F 型學生的國中三年是一場「信心的慢火烘焙」。如果沒能提早介入成功體驗，他們會從<span className='text-slate-900 font-bold'>「暫時落後」演變成「終身放棄」</span>。",
+        timeline: [
+          { grade: "Grade 7", phase: "G1", title: "【觀望期】—— 阻止「無聲墜落」", keyword: "建立安全感", desc: "由於節奏變快，會因跟不上而連鎖反應。他們不求救而是默默放空或睡覺。", strategy: "導師密切監控狀況，不給予責備，而是給予「我陪你寫完」的承諾，確保連結不中斷。" },
+          { grade: "Grade 8", phase: "G2", title: "【危險期】—— 避免「理數性放棄」", keyword: "小步舞曲", desc: "理化幾何轉型時極易產生「天生沒這塊料」的念頭. 一旦放棄理數會產生強烈自卑感。", strategy: "介入「小步舞曲策略」。剔除所有難題，只要求掌握 20% 核心基礎，用降維引導守住底線。" },
+          { grade: "Grade 9", phase: "G3", title: "【覺醒期】—— 啟動「拾級而上」", keyword: "減法複習", desc: "常覺得救不起來。但若守住基本盤，適當精簡考點後能發揮出驚人的穩定性。", strategy: "提供「減法複習清單」。專注奪取基礎 B 等級，透過拿分點訓練，拿到屬於他的尊嚴分數。" }
+        ],
+        conclusion: "F 型的孩子是一顆在寒冬中生長的種子，需要更多的耐心與灌溉. 耶加的任務不是拔苗助長，而是提供溫暖的土壤與陽光，等待他發芽的那一天。"
+      }
+    };
+
+    return <ReportTemplate data={mockReports[page]} onBack={() => { setAnswers({}); setStudentName(""); setPage(0); }} />;
+  };
+
+  return (
+    <div className="relative">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 backdrop-blur-md px-6 py-3 rounded-full shadow-2xl border border-white/20 flex gap-4 items-center text-white overflow-x-auto max-w-[90vw] print:hidden">
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-2 border-r border-slate-700 pr-4 shrink-0">頁面切換</span>
+        <button onClick={() => setPage(0)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${page === 0 ? 'bg-white text-slate-900 shadow-lg' : 'hover:bg-white/10'}`}>測驗頁 (P0)</button>
+        {[1,2,3,4,5,6].map(num => (
+          <button key={num} onClick={() => setPage(num)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${page === num ? 'bg-indigo-500 text-white shadow-lg' : 'hover:bg-white/10'}`}>
+            {String.fromCharCode(64 + num)}型 (P{num})
+          </button>
+        ))}
+      </div>
+      {renderPage()}
     </div>
+  );
+};
 
-    <button class="btn-submit" onclick="location.reload()">再測一次</button>
-</div>
-
-<script>
-    // ⚠️⚠️⚠️ 請將下方的網址換成你自己的 Apps Script 網址 ⚠️⚠️⚠️
-    const googleScriptUrl = "https://script.google.com/macros/s/AKfycbwqpAVOpZKKQTox1q_ev0lZE5tMAAnZQCFfF6kMDuQkHZ8JKL_CW1Y0cO33ed-sMtpC/exec";
-    // ⚠️⚠️⚠️ 範例： "https://script.google.com/macros/s/AKfycbx.../exec"
-
-    function processQuiz() {
-        const form = document.getElementById('quizForm');
-        const formData = new FormData(form);
-        const name = document.getElementById('studentName').value.trim();
-
-        // 檢查姓名
-        if (!name) {
-            alert("請先輸入你的名字喔！");
-            return;
-        }
-        
-        // 檢查是否每題都填寫
-        let answeredCount = 0;
-        for (let pair of formData.entries()) {
-            if (pair[0].startsWith('q')) answeredCount++;
-        }
-        if (answeredCount < 10) {
-            alert("請先完成所有題目再送出喔！");
-            return;
-        }
-
-        // 鎖定按鈕避免重複按
-        document.getElementById('submitBtn').disabled = true;
-        document.getElementById('loadingText').style.display = 'block';
-
-        // 1. 統計分數 (Q3-Q10)
-        let counts = { A: 0, B: 0, C: 0, D: 0 };
-        for (let i = 3; i <= 10; i++) {
-            let val = formData.get('q' + i);
-            if (val) counts[val]++;
-        }
-
-        // 2. 邏輯判定
-        let q5 = formData.get('q5');
-        let q6 = formData.get('q6');
-        let q7 = formData.get('q7');
-        let q10 = formData.get('q10');
-        let type = "";
-        
-        let maxScore = Math.max(counts.A, counts.B, counts.C, counts.D);
-        let maxOption = Object.keys(counts).find(key => counts[key] === maxScore);
-
-        if (maxOption === 'A') {
-            type = "A";
-        } else if (maxOption === 'C') {
-            type = "C";
-        } else {
-            if (q7 === 'C' || q10 === 'C' || (counts.D > 2 && q6 === 'D')) {
-                type = "E";
-            } else if (q7 === 'B' || q10 === 'B' || q5 === 'D') {
-                type = "D";
-            } else if (maxOption === 'D' && (q7 === 'D' || q10 === 'D')) {
-                type = "F";
-            } else {
-                type = "B";
-            }
-        }
-        if (type === "B" && counts.D > counts.B) type = "F"; 
-
-        // 3. 準備上傳的資料
-        const answers = {};
-        for (let i = 1; i <= 10; i++) answers['q'+i] = formData.get('q'+i);
-
-        const uploadData = {
-            name: name,
-            resultType: type,
-            answers: answers
-        };
-
-        // 4. 上傳到 Google Sheets (不等待回應直接顯示結果，提升體驗)
-        fetch(googleScriptUrl, {
-            method: 'POST',
-            mode: 'no-cors', // 重要：避免跨域錯誤
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(uploadData)
-        }).then(() => {
-            console.log("Data sent");
-        }).catch(err => {
-            console.error("Error:", err);
-            // 就算上傳失敗也讓學生看結果，避免卡住
-        });
-
-        // 5. 顯示結果
-        setTimeout(() => {
-            showResult(type, name);
-        }, 1500); // 假裝跑一下 Loading 增加儀式感
-    }
-
-    function showResult(type, name) {
-        const results = {
-            "A": {
-                title: "🟢 A型：成長型挑戰者",
-                traits: "你是班上的火車頭！你有責任感，相信努力就能變強。遇到困難時，你會想辦法解決，而不是逃避。你擁有很棒的「抗壓性」與「學習自信」。",
-                advice: "別忘了偶爾停下來休息！試著把你的學習策略分享給同學，擔任小老師會讓你學得更深。",
-                parent: "您的孩子擁有強大的自我驅動力。請多肯定他的「策略」與「堅持」，並適時提醒他休息與放鬆。"
-            },
-            "B": {
-                title: "🟡 B型：熱情型行動者",
-                traits: "你有滿滿的熱情與行動力！你反應很快，也不怕新挑戰。不過有時候遇到挫折，你習慣覺得是運氣不好或題目太難，比較少檢查自己。",
-                advice: "你的能量很強，如果能把「怪運氣」的時間拿來「找方法」，你會進步得超級快！試著每天寫下一件自己做得很棒的小事。",
-                parent: "孩子很有活力，但容易歸咎外在。請溫柔地引導他思考「自己能控制的部分」，將焦點從藉口轉移到具體行動上。"
-            },
-            "C": {
-                title: "🔵 C型：專注型完美者",
-                traits: "你對自己要求很高，做事細心又負責。但你很怕犯錯，考不好時會非常自責，覺得自己不夠好。其實，你已經很棒了！",
-                advice: "錯誤不是因為你笨，只是代表「還沒熟練」而已。試著對自己寬容一點，不完美也沒關係，放輕鬆反而表現會更好喔！",
-                parent: "孩子責任感強但易焦慮。請成為他的避風港，告訴他「無論成績如何，我們都愛你」，幫助他將自我價值與分數脫鉤。"
-            },
-            "D": {
-                title: "🟠 D型：表現型堅持者",
-                traits: "你很重視榮譽感，喜歡被看見、被肯定的感覺！為了掌聲，你願意付出努力。但如果沒人稱讚，你可能就會覺得沒動力。",
-                advice: "掌聲很棒，但「自己肯定自己」更重要！試著在沒人看見的時候也默默努力，那種帥氣才是最真實的實力。",
-                parent: "孩子需要舞台與掌聲。請多給予具體的肯定，但也要引導他看見「努力本身的價值」，學會為自己而讀。"
-            },
-            "E": {
-                title: "🩵 E型：潛能型探索者",
-                traits: "你其實很聰明，反應也快！只是你覺得課本很無聊，只對自己有興趣的東西（如遊戲、社團）有動力。你是個沉睡的巨人。",
-                advice: "試著把你的聰明用一點點在課業上，當作是「破關遊戲」來玩。你會發現，只要你願意，學校的東西根本難不倒你！",
-                parent: "孩子很聰明但缺乏動機。請試著將學習與他的興趣做連結，或是用「談判/交換」的方式，激發他的挑戰慾。"
-            },
-            "F": {
-                title: "🩶 F型：支持型學習者",
-                traits: "你比較安靜，也比較容易緊張。你常覺得自己學不會，所以乾脆不寫作業來保護自己。其實你不是不會，只是需要多一點時間。",
-                advice: "不用跟別人比，只要跟昨天的自己比就好。每天只設定一個「超簡單」的小目標（例如只寫 3 題），慢慢來，你做得到的！",
-                parent: "孩子目前信心不足。請降低標準，給予大量的安全感與陪伴。只要他願意開始做一點點，就給予大大的肯定。"
-            }
-        };
-
-        const data = results[type];
-        document.getElementById('quiz-area').style.display = 'none';
-        document.getElementById('result-area').style.display = 'block';
-        
-        document.getElementById('display-name').innerText = name;
-        document.getElementById('result-title').innerText = data.title;
-        document.getElementById('result-traits').innerText = data.traits;
-        document.getElementById('result-advice').innerText = data.advice;
-        document.getElementById('parent-advice').innerText = data.parent;
-        
-        const colors = { "A": "#2ecc71", "B": "#f1c40f", "C": "#3498db", "D": "#e67e22", "E": "#1abc9c", "F": "#95a5a6" };
-        document.getElementById('result-title').style.color = colors[type];
-    }
-</script>
-
-</body>
-</html>
+export default App;
